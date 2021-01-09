@@ -352,34 +352,34 @@ class boseSoundTouch {
         }
     }
 
-    _sameStation(obj1, obj2) {
-        return (obj1.source === obj2.source && obj1.station === obj2.station);
+    _sameStation(obj1, obj2) {        
+        return (obj1.source === obj2.source && obj1.station.toLowerCase() === obj2.station.toLowerCase());
     }
 
     _sameTrack(obj1, obj2) {
-        return (obj1.source === obj2.source && obj1.artist === obj2.artist && obj1.track === obj2.track);
+        return (obj1.source === obj2.source && obj1.artist.toLowerCase() === obj2.artist.toLowerCase() && obj1.track.toLowerCase() === obj2.track.toLowerCase());
     }
 
     _collectCheckSyncFinished(namespaceList, originNowPlaying) {
         var instance = this;
         let setMasterOf = [];
         let existMaster = false;
-        Object.keys(namespaceList).forEach(key => {
+        Object.keys(namespaceList).forEach(key => {            
             const dataFromKey = namespaceList[key];
             const syncNowPlaying = {
-                source: dataFromKey[key + BOSE_ID_NOW_PLAYING_SOURCE].val,
-                track: dataFromKey[key + BOSE_ID_NOW_PLAYING_TRACK].val,
-                artist: dataFromKey[key + BOSE_ID_NOW_PLAYING_ARTIST].val,
-                album: dataFromKey[key + BOSE_ID_NOW_PLAYING_ALBUM].val,
-                station: dataFromKey[key + BOSE_ID_NOW_PLAYING_STATION].val,
-                art: dataFromKey[key + BOSE_ID_NOW_PLAYING_ART].val,
-                genre: dataFromKey[key + BOSE_ID_NOW_PLAYING_GENRE].val
+                source: dataFromKey[key + BOSE_ID_NOW_PLAYING_SOURCE.id].val,
+                track: dataFromKey[key + BOSE_ID_NOW_PLAYING_TRACK.id].val,
+                artist: dataFromKey[key + BOSE_ID_NOW_PLAYING_ARTIST.id].val,
+                album: dataFromKey[key + BOSE_ID_NOW_PLAYING_ALBUM.id].val,
+                station: dataFromKey[key + BOSE_ID_NOW_PLAYING_STATION.id].val,
+                art: dataFromKey[key + BOSE_ID_NOW_PLAYING_ART.id].val,
+                genre: dataFromKey[key + BOSE_ID_NOW_PLAYING_GENRE.id].val
             }
 
-            if (instance._sameStation(syncNowPlaying, originNowPlaying) | instance._sameTrack(syncNowPlaying, originNowPlaying)) {
-                const syncMasterOf = dataFromKey[key + BOSE_ID_ZONES_MASTER_OF].val;
+            if (instance._sameStation(syncNowPlaying, originNowPlaying) || instance._sameTrack(syncNowPlaying, originNowPlaying)) {                
+                const syncMasterOf = dataFromKey[key + BOSE_ID_ZONES_MASTER_OF.id].val;                
                 if (!(syncMasterOf.split(';').some(masterData => masterData === instance.adapter.macAddress))) {
-                    setMasterOf.push(dataFromKey[key + BOSE_ID_INFO_MAC_ADDRESS].val)
+                    setMasterOf.push(dataFromKey[key + BOSE_ID_INFO_MAC_ADDRESS.id].val)
                 } else {
                     existMaster = true;
                 }
@@ -439,12 +439,12 @@ class boseSoundTouch {
     }
 
     setZone(obj) {
-        if (!obj || obj === '') {
+        if (!obj || obj === '') {            
             this.setState(BOSE_ID_ZONES_MEMBER_OF, '', {ack: true});
             this.setState(BOSE_ID_ZONES_MASTER_OF, '', {ack: true});
         }
-        else {
-            if (obj.master === this.adapter.macAddress) {
+        else {            
+            if (obj.$.master === this.adapter.macAddress) {
                 let members = [];
                 if (obj.member && obj.member.length > 0) {
                     obj.member.forEach(member => {
@@ -453,13 +453,13 @@ class boseSoundTouch {
                 }
                 else {
                     members.push(obj.member._);
-                }
+                }                
                 this.setState(BOSE_ID_ZONES_MASTER_OF, members.join(';'), {ack: true});
                 this.setState(BOSE_ID_ZONES_MEMBER_OF, '', {ack: true});
             }
             else {
                 this.setState(BOSE_ID_ZONES_MASTER_OF, '', {ack: true});
-                this.setState(BOSE_ID_ZONES_MEMBER_OF, obj.master, {ack: true});
+                this.setState(BOSE_ID_ZONES_MEMBER_OF, obj.$.master, {ack: true});
             }
         }
     }
@@ -540,7 +540,7 @@ class boseSoundTouch {
 
     handleMasterOf(setMacAddresses, setZoneFunction, add) {
         var instance = this;
-        instance.adapter.getState(BOSE_ID_ZONES_MASTER_OF, function(err, stateMasterOf) {
+        instance.adapter.getState(BOSE_ID_ZONES_MASTER_OF.id, function(err, stateMasterOf) {
             if (err) {
                 instance.adapter.log.error(err);
             }
@@ -587,13 +587,13 @@ class boseSoundTouch {
                             const index = systemId[systemId.length - 1];
                             const namespace = systemId[systemId.length - 2] + '.' + index + '.';
 
-                            instance.adapter.getForeignState(namespace + BOSE_ID_INFO_MAC_ADDRESS, function(err, stateMacAddress) {
+                            instance.adapter.getForeignState(namespace + BOSE_ID_INFO_MAC_ADDRESS.id, function(err, stateMacAddress) {
                                 if (err) {
                                     instance.adapter.log.error(err);
                                 }
                                 else {
                                     if (stateMacAddress.val === slaveMacAddress) {
-                                        instance.adapter.getForeignState(namespace + BOSE_ID_INFO_IP_ADDRESS, function(err, stateIpAddress) {
+                                        instance.adapter.getForeignState(namespace + BOSE_ID_INFO_IP_ADDRESS.id, function(err, stateIpAddress) {
                                             if (err) {
                                                 instance.adapter.log.error(err);
                                             }
@@ -635,8 +635,8 @@ class boseSoundTouch {
                             var systemId  = doc.rows[i].id.split('.');
                             var index = systemId[systemId.length - 1];
                             var namespace = systemId[systemId.length - 2] + '.' + index + '.';
-                            toDoList.push(namespace + BOSE_ID_INFO_IP_ADDRESS);
-                            toDoList.push(namespace + BOSE_ID_INFO_MAC_ADDRESS);
+                            toDoList.push(namespace + BOSE_ID_INFO_IP_ADDRESS.id);
+                            toDoList.push(namespace + BOSE_ID_INFO_MAC_ADDRESS.id);
                         }
                     }
 
